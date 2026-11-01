@@ -2,11 +2,11 @@ export const lessons = [
  {id:'phishing',icon:'✉',title:'Spot Phishing',time:'8 min',intro:'Learn how to recognize deceptive messages, links, attachments, and impersonation attempts before they lead to account compromise.',points:[
  'Understand the trick: phishing is an attempt to obtain passwords, financial details, or access by pretending to be a trusted organization or person.',
  'Inspect the actual domain, not just the company logo or sender display name. For example, accounts.example.com is different from accounts-example.com.',
- 'Watch for pressure tactics: “act within 10 minutes”, threats, prize announcements, or requests to keep a transaction secret.',
+ 'Watch for pressure tactics: "act within 10 minutes", threats, prize announcements, or requests to keep a transaction secret.',
  'Treat unexpected attachments, QR codes, shortened links, and requests to sign in as reasons to verify independently.',
  'Never enter credentials after following an unexpected link. Open the official app or type the verified website address yourself.',
- 'Report suspicious messages using your organization’s reporting process. If you already clicked, change affected credentials and contact support promptly.'
- ],scenario:'A message says: “Your university account expires today. Verify immediately using this shortened link.” It includes the university logo and a familiar name.',answer:'Do not use the link. Visit your university’s official website or contact its IT helpdesk through a known channel. Report the message.'},
+ 'Report suspicious messages using your organization\'s reporting process. If you already clicked, change affected credentials and contact support promptly.'
+ ],scenario:'A message says: "Your university account expires today. Verify immediately using this shortened link." It includes the university logo and a familiar name.',answer:'Do not use the link. Visit your university\'s official website or contact its IT helpdesk through a known channel. Report the message.'},
  {id:'passwords',icon:'🔑',title:'Passwords & MFA',time:'8 min',intro:'Protect accounts with unique passphrases, password managers, and effective multifactor authentication.',points:[
  'Use a different password for every important account so that one exposed password cannot unlock your other accounts.',
  'Long passwords or passphrases are harder to guess. Avoid names, birthdays, common phrases, and predictable substitutions such as P@ssw0rd.',

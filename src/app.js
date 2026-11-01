@@ -1,5 +1,5 @@
 import {lessons,questions} from './content.js';
-import {scoreQuiz,earnedCertificate,safeDisplayName} from './quiz.js';
+import {scoreQuiz,earnedCertificate,safeDisplayName,buildFormUrl} from './quiz.js';
 const storageKey='cyberaware-academy-v1';
 function readState(){try{const s=JSON.parse(localStorage.getItem(storageKey));return {completed:Array.isArray(s?.completed)?s.completed.filter(id=>lessons.some(l=>l.id===id)):[],lastPercentage:Number.isFinite(s?.lastPercentage)?s.lastPercentage:null};}catch{return {completed:[],lastPercentage:null};}}
 let state=readState();let latestScore=null;
@@ -11,7 +11,28 @@ function renderQuiz(){const root=$('quizPanel');root.replaceChildren();const for
 form.querySelectorAll('.question--unanswered').forEach(f=>f.classList.remove('question--unanswered'));warning.hidden=true;// Collect unanswered question IDs
 const data=new FormData(form);const unanswered=questions.filter(q=>data.get(`q${q.id}`)===null);if(unanswered.length>0){const count=unanswered.length;warning.textContent=`Please answer ${count} unanswered question${count>1?'s':''} before submitting.`;warning.hidden=false;unanswered.forEach(q=>{const fieldset=form.querySelector(`[data-qid="${q.id}"]`);if(fieldset)fieldset.classList.add('question--unanswered');});const firstFieldset=form.querySelector('.question--unanswered');if(firstFieldset)firstFieldset.scrollIntoView({behavior:'smooth',block:'center'});return;}// All questions answered — score
 const answers=Object.fromEntries(questions.map(q=>[q.id,data.get(`q${q.id}`)]));latestScore=scoreQuiz(questions,answers);state.lastPercentage=latestScore.percentage;save();renderResults();renderCertificate();});root.append(form);}
-function renderResults(){const root=$('quizPanel');root.replaceChildren();const result=latestScore;const wrapper=document.createElement('div');wrapper.className='results';const success=result.percentage>=70;wrapper.innerHTML=`<span class="kicker">ASSESSMENT COMPLETE</span><h3>${success?'Excellent progress!':'Keep learning — you can retry.'}</h3><div class="score">${result.percentage}<small>%</small></div><p>You answered <b>${result.correct} out of ${result.total}</b> questions correctly. ${success?'You met the quiz pass threshold.':'Review the feedback and try again.'}</p>`;result.results.forEach((r,i)=>{const d=document.createElement('div');d.className='feedback';const head=document.createElement('strong');head.textContent=`${r.correct?'✓':'✕'} Question ${i+1}: ${r.correct?'Correct':'Review needed'}`;const exp=document.createElement('p');exp.textContent=r.explanation;d.append(head,exp);wrapper.append(d);});const button=document.createElement('button');button.className='outline';button.textContent='Retake quiz ↻';button.addEventListener('click',()=>{latestScore=null;renderQuiz();$('assessment').scrollIntoView({behavior:'smooth'});});wrapper.append(button);root.append(wrapper);}
+function renderResults(){
+  const root=$('quizPanel');root.replaceChildren();
+  const result=latestScore;
+  const wrapper=document.createElement('div');wrapper.className='results';
+  const success=result.percentage>=70;
+  wrapper.innerHTML=`<span class="kicker">ASSESSMENT COMPLETE</span><h3>${success?'Excellent progress!':'Keep learning — you can retry.'}</h3><div class="score">${result.percentage}<small>%</small></div><p>You answered <b>${result.correct} out of ${result.total}</b> questions correctly. ${success?'You met the quiz pass threshold.':'Review the feedback and try again.'}</p>`;
+  result.results.forEach((r,i)=>{const d=document.createElement('div');d.className='feedback';const head=document.createElement('strong');head.textContent=`${r.correct?'✓':'✕'} Question ${i+1}: ${r.correct?'Correct':'Review needed'}`;const exp=document.createElement('p');exp.textContent=r.explanation;d.append(head,exp);wrapper.append(d);});
+
+  // Record My Result block — visible only after a completed submission
+  const recordBlock=document.createElement('div');recordBlock.className='recordBlock';
+  const recordNote=document.createElement('p');recordNote.className='recordNote';recordNote.textContent='Your assessment result will open in Google Forms. Please review and submit it to record your attempt. Your information will be stored for educational participation tracking.';
+  // Determine whether the certificate has been earned based on actual application state.
+  // Passing the quiz alone is NOT enough — all four lessons must also be completed.
+  const certEarned=earnedCertificate(result.percentage,state.completed,lessons);
+  const formUrl=buildFormUrl({percentage:result.percentage,certificateEarned:certEarned});
+  const recordBtn=document.createElement('a');recordBtn.href=formUrl;recordBtn.target='_blank';recordBtn.rel='noopener noreferrer';recordBtn.className='outline recordBtn';recordBtn.textContent='Record my result ↗';
+  recordBlock.append(recordNote,recordBtn);
+  wrapper.append(recordBlock);
+
+  const retakeBtn=document.createElement('button');retakeBtn.className='outline';retakeBtn.textContent='Retake quiz ↻';retakeBtn.addEventListener('click',()=>{latestScore=null;renderQuiz();$('assessment').scrollIntoView({behavior:'smooth'});});wrapper.append(retakeBtn);
+  root.append(wrapper);
+}
 function renderCertificate(){
  const root=$('certPanel');root.replaceChildren();
  const eligible=state.lastPercentage!==null&&earnedCertificate(state.lastPercentage,state.completed,lessons);
